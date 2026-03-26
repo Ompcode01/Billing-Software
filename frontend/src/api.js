@@ -13,10 +13,11 @@ import axios from "axios";
 const API = axios.create({ baseURL: "/api" });
 
 // ── BILLS ────────────────────────────────────────────────────────────────────
-export const getBills      = ()       => API.get("/bills").then(r => r.data);
-export const getBill       = (id)     => API.get(`/bills/${id}`).then(r => r.data);
-export const createBill    = (data)   => API.post("/bills", data).then(r => r.data);
-export const deleteBill    = (id)     => API.delete(`/bills/${id}`).then(r => r.data);
+export const getBills           = ()       => API.get("/bills").then(r => r.data);
+export const getBill            = (id)     => API.get(`/bills/${id}`).then(r => r.data);
+export const createBill         = (data)   => API.post("/bills", data).then(r => r.data);
+export const deleteBill         = (id)     => API.delete(`/bills/${id}`).then(r => r.data);
+export const sendWhatsAppReceipt = (id)    => API.post(`/bills/${id}/send-whatsapp`).then(r => r.data);
 
 // ── PRODUCTS ─────────────────────────────────────────────────────────────────
 export const getProducts   = ()       => API.get("/products").then(r => r.data);

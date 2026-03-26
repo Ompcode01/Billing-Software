@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getBill, deleteBill, getSettings } from "../api";
+import { getBill, deleteBill, getSettings, sendWhatsAppReceipt } from "../api";
 
 export default function BillDetail() {
   const { id }      = useParams();        // Gets :id from URL /bills/:id
@@ -13,6 +13,8 @@ export default function BillDetail() {
   const [bill, setBill]         = useState(null);
   const [settings, setSettings] = useState({});
   const [loading, setLoading]   = useState(true);
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
+  const [whatsAppStatus, setWhatsAppStatus]   = useState(null);
 
   useEffect(() => {
     Promise.all([getBill(id), getSettings()]).then(([b, s]) => {
@@ -30,6 +32,42 @@ export default function BillDetail() {
 
   const handlePrint = () => window.print();
 
+  const handleSendWhatsApp = async () => {
+    if (!bill.customerPhone) {
+      alert("❌ Customer phone number is required to send via WhatsApp");
+      return;
+    }
+
+    setSendingWhatsApp(true);
+    setWhatsAppStatus(null);
+
+    try {
+      const result = await sendWhatsAppReceipt(id);
+      setWhatsAppStatus({
+        type: "success",
+        message: `✅ Receipt sent to ${result.phoneNumber}`,
+      });
+      setTimeout(() => setWhatsAppStatus(null), 5000); // Auto-hide after 5s
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || "Failed to send receipt";
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === "WHATSAPP_NOT_CONFIGURED") {
+        setWhatsAppStatus({
+          type: "error",
+          message: "⚠️ WhatsApp is not configured. Please add API credentials in Settings.",
+        });
+      } else {
+        setWhatsAppStatus({
+          type: "error",
+          message: `❌ ${errorMessage}`,
+        });
+      }
+    } finally {
+      setSendingWhatsApp(false);
+    }
+  };
+
   if (loading) return <div className="text-muted">Loading bill...</div>;
   if (!bill)   return <div>Bill not found.</div>;
 
@@ -40,11 +78,32 @@ export default function BillDetail() {
         <div>
           <Link to="/transactions" className="btn btn-outline btn-sm">← Back</Link>
         </div>
-        <div style={{display:"flex", gap:10}}>
+        <div style={{display:"flex", gap:10, flexWrap: "wrap"}}>
+          <button className="btn btn-success" onClick={handleSendWhatsApp} disabled={sendingWhatsApp}>
+            {sendingWhatsApp ? "⏳ Sending..." : "💬 Send via WhatsApp"}
+          </button>
           <button className="btn btn-primary" onClick={handlePrint}>🖨️ Print / Save PDF</button>
           <button className="btn btn-danger"  onClick={handleDelete}>🗑️ Delete</button>
         </div>
       </div>
+
+      {/* WhatsApp Status Message */}
+      {whatsAppStatus && (
+        <div 
+          className="card" 
+          style={{
+            marginBottom: 16,
+            padding: "12px 16px",
+            background: whatsAppStatus.type === "success" ? "#d4edda" : "#f8d7da",
+            border: `1px solid ${whatsAppStatus.type === "success" ? "#c3e6cb" : "#f5c6cb"}`,
+            borderRadius: 6,
+            color: whatsAppStatus.type === "success" ? "#155724" : "#721c24",
+            fontSize: 14
+          }}
+        >
+          {whatsAppStatus.message}
+        </div>
+      )}
 
       {/* ── PRINTABLE INVOICE ── */}
       <div ref={printRef} className="card print-bill" style={{maxWidth:740, margin:"0 auto"}}>
