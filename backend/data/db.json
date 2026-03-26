@@ -1,0 +1,35 @@
+{
+  "bills": [
+    {
+      "id": "741da7b6-a3bc-4bb4-a61c-e3bc0ceebe14",
+      "billNumber": "INV-0001",
+      "customerName": "Omprakash ",
+      "customerPhone": "9029193357",
+      "items": [
+        {
+          "name": "5x7 Lamnation Frame",
+          "qty": 1,
+          "price": 250,
+          "taxRate": 0,
+          "unit": "pcs"
+        }
+      ],
+      "subtotal": 250,
+      "taxAmount": 0,
+      "discount": 0,
+      "discountAmount": 0,
+      "grandTotal": 250,
+      "notes": "Thank you for choosing us! ",
+      "status": "paid",
+      "createdAt": "2026-03-22T11:25:05.661Z"
+    }
+  ],
+  "products": [],
+  "customers": [],
+  "settings": {
+    "shopName": "Creative Arts Photo Studio",
+    "gstin": "",
+    "address": "",
+    "phone": ""
+  }
+}
